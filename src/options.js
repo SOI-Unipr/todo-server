@@ -8,7 +8,7 @@ function assertPort(port, program, excode) {
     }
 }
 
-function parse(custDflt = {}) {
+function parse() {
     const {version} = require('../package.json');
     const program = require('commander');
 
