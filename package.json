@@ -1,0 +1,23 @@
+{
+  "name": "todo-server",
+  "version": "1.0.0",
+  "description": "REST APIs for the TODO web application",
+  "main": "src/server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/SOI-2020/todo-server.git"
+  },
+  "author": "Daniele Porta",
+  "maintainers": [
+    "Fabio Strozzi <fabio.strozzi@mapsgroup.it>",
+    "Daniele Porta <daniele.porta@mapsgroup.it>"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/SOI-2020/todo-server/issues"
+  },
+  "homepage": "https://github.com/SOI-2020/todo-server#readme"
+}
