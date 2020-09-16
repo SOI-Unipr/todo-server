@@ -53,19 +53,19 @@ function routes(app) {
     });
 
     app.post('/task', (req, resp) => {
-        // TODO
+        // TODO this API saves a new task
         resp.status(418);
         resp.json("I'm a teapot");
     });
 
     app.put('/task/:id', (req, resp) => {
-        // TODO
+        // TODO this API updates an existing task
         resp.status(418);
         resp.json("I'm a teapot");
     });
 
     app.delete('/task/:id', (req, resp) => {
-        // TODO
+        // TODO this API deletes an existing task
         resp.status(418);
         resp.json("I'm a teapot");
     });
