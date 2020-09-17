@@ -40,10 +40,29 @@ function toDTO(task) {
     };
 }
 
+function isNonBlank(str) {
+    return typeof str === 'string' && str.trim();
+}
+
+function isInteger(n) {
+    if (typeof n === 'number') {
+        return true;
+    }
+    if (typeof n === 'string') {
+        try {
+            parseInt(n, 10);
+            return true;
+        } catch (_) {
+            return false;
+        }
+    }
+    return false;
+}
+
 function routes(app) {
 
     app.get('/tasks', (req, resp) => {
-        console.debug('Received call to /tasks', {query: req.query});
+        console.debug('Retrieving all tasks');
 
         const objects = tasks.map(toDTO);
         resp.json({
@@ -53,21 +72,84 @@ function routes(app) {
     });
 
     app.post('/task', (req, resp) => {
-        // TODO this API saves a new task
-        resp.status(418);
-        resp.json("I'm a teapot");
+        const {description} = req.body;
+        console.debug('Attempting to crete a new task', {description});
+
+        if (!isNonBlank(description)) {
+            resp.status(400);
+            resp.json({error: 'Missing task description'});
+            return;
+        }
+        if (description.trim().length > 50) {
+            resp.status(400);
+            resp.json({error: 'Too long task description'});
+            return;
+        }
+
+        const task = new Task(seq(), description.trim());
+        tasks.push(task);
+        console.info('Task successfully created', {task});
+
+        resp.status(201);
+        resp.json(toDTO(task));
     });
 
     app.put('/task/:id', (req, resp) => {
-        // TODO this API updates an existing task
-        resp.status(418);
-        resp.json("I'm a teapot");
+        const {description} = req.body;
+        const idRaw = req.params.id;
+        console.debug('Attempting to update task', {id: idRaw, description});
+
+        if (!isNonBlank(description)) {
+            resp.status(400);
+            resp.json({error: 'Missing task description'});
+            return;
+        }
+        if (description.trim().length > 50) {
+            resp.status(400);
+            resp.json({error: 'Too long task description'});
+            return;
+        }
+        if (!isInteger(idRaw)) {
+            resp.status(400);
+            resp.json({error: 'Invalid task identifier'});
+            return;
+        }
+        const id = parseInt(idRaw, 10);
+        const task = tasks.find(t => t.id === id);
+        if (!task) {
+            resp.status(404);
+            resp.json({error: 'Task not found'});
+            return;
+        }
+
+        task.description = description.trim();
+        resp.status(200);
+        console.info('Task successfully updated', {task});
+
+        resp.json(toDTO(task));
     });
 
     app.delete('/task/:id', (req, resp) => {
-        // TODO this API deletes an existing task
-        resp.status(418);
-        resp.json("I'm a teapot");
+        const idRaw = req.params.id;
+        console.debug('Attempting to delete task', {id: idRaw});
+
+        if (!isInteger(idRaw)) {
+            resp.status(400);
+            resp.json({error: 'Invalid task identifier'});
+            return;
+        }
+        const id = parseInt(idRaw, 10);
+        const j = tasks.findIndex(t => t.id === id);
+        if (j < 0) {
+            resp.status(404);
+            resp.json({error: 'Task not found'});
+            return;
+        }
+        const [task] = tasks.splice(j, 1);
+
+        console.info('Task successfully deleted', {task});
+        resp.status(200);
+        resp.json(toDTO(task));
     });
 }
 
