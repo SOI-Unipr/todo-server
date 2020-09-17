@@ -42,6 +42,8 @@
     "uuid"
   ],
   "devDependencies": {
-    "eslint": "^7.9.0"
+    "eslint": "^7.9.0",
+    "http-proxy": "^1.18.1",
+    "http-proxy-rules": "^1.1.3"
   }
 }
