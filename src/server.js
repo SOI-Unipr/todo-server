@@ -48,7 +48,6 @@ function fallbacks(app) {
     // generic error handler => err.status || 500 + json
     // NOTE keep the `next` parameter even if unused, this is mandatory for Express 4
     /* eslint-disable-next-line no-unused-vars */
-    // noinspection JSUnusedLocalSymbols
     app.use((err, req, res, next) => {
         const errmsg = err.message || util.inspect(err);
         console.error(`Unexpected error occurred while calling ${req.path}: ${errmsg}`);
@@ -59,7 +58,6 @@ function fallbacks(app) {
     // if we are here, then there's no valid route => 400 + json
     // NOTE keep the `next` parameter even if unused, this is mandatory for Express 4
     /* eslint-disable no-unused-vars */
-    // noinspection JSUnusedLocalSymbols
     app.use((req, res, next) => {
         console.error(`Route not found to ${req.path}`);
         res.status(404);
