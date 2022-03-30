@@ -59,9 +59,19 @@ function isInteger(n) {
     return false;
 }
 
-function routes(app) {
+/**
+ * Initializes routes.
+ * @param {Express} app Express application
+ * @param {OIDCMiddleware} oidc OpenID Connect middleware
+ */
+export function routes(app, oidc) {
+    const authenticate = (req, res, next) => oidc.validate(req, res, next);
 
-    app.get('/tasks', (req, resp) => {
+    app.get('/login', (req, resp) => {
+        oidc.login(req, res);
+    });
+
+    app.get('/tasks', authenticate, (req, resp) => {
         console.debug('Retrieving all tasks');
 
         const objects = tasks.map(toDTO);
@@ -71,7 +81,7 @@ function routes(app) {
         });
     });
 
-    app.post('/task', (req, resp) => {
+    app.post('/task', authenticate, (req, resp) => {
         const {description} = req.body;
         console.debug('Attempting to crete a new task', {description});
 
@@ -94,7 +104,7 @@ function routes(app) {
         resp.json(toDTO(task));
     });
 
-    app.put('/task/:id', (req, resp) => {
+    app.put('/task/:id', authenticate, (req, resp) => {
         const {description} = req.body;
         const idRaw = req.params.id;
         console.debug('Attempting to update task', {id: idRaw, description});
@@ -129,7 +139,7 @@ function routes(app) {
         resp.json(toDTO(task));
     });
 
-    app.delete('/task/:id', (req, resp) => {
+    app.delete('/task/:id', authenticate, (req, resp) => {
         const idRaw = req.params.id;
         console.debug('Attempting to delete task', {id: idRaw});
 
@@ -153,4 +163,4 @@ function routes(app) {
     });
 }
 
-module.exports = {routes};
+export default routes;

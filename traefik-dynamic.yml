@@ -3,12 +3,12 @@ http:
     to-app-fe:
       entryPoints:
         - app
-      rule: "Host(`soi-lab.local`) && !PathPrefix(`/api`)"
+      rule: "Host(`localhost`) && !PathPrefix(`/api`)"
       service: app-fe
     to-app-be:
       entryPoints:
         - app
-      rule: "HostRegexp(`soi-lab.local`) && PathPrefix(`/api`)"
+      rule: "HostRegexp(`localhost`) && PathPrefix(`/api`)"
       middlewares:
         - strip-api-prefix
       service: app-be

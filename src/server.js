@@ -1,19 +1,20 @@
 'use strict';
 
-const util = require('util');
+import util from 'util';
 
 // utilities
-const uuid = require('uuid').v4;
+import {v4 as uuid} from 'uuid';
 
 // express
-const express = require('express');
-const methodOverride = require('method-override');
-const bodyParser = require('body-parser');
-const compression = require('compression');
+import express from 'express';
+import methodOverride from 'method-override';
+import bodyParser from 'body-parser';
+import compression from 'compression';
 
 // own modules
-const opts = require('./options');
-const {routes} = require('./routes');
+import opts from './options.js';
+import {routes} from './routes.js';
+import {OIDCMiddleware} from './openid.js';
 
 // creates the configuration options and the logger
 const options = opts();
@@ -21,8 +22,7 @@ const options = opts();
 /**
  * Initializes the application middlewares.
  *
- * @param {Object} app Express application
- * @returns {void}
+ * @param {Express} app Express application
  */
 function init(app) {
     app.use(compression());
@@ -50,7 +50,7 @@ function fallbacks(app) {
     /* eslint-disable-next-line no-unused-vars */
     app.use((err, req, res, next) => {
         const errmsg = err.message || util.inspect(err);
-        console.error(`Unexpected error occurred while calling ${req.path}: ${errmsg}`);
+        console.error(`💥 Unexpected error occurred while calling ${req.path}: ${errmsg}`);
         res.status(err.status || 500);
         res.json({error: err.message || 'Internal server error'});
     });
@@ -59,18 +59,26 @@ function fallbacks(app) {
     // NOTE keep the `next` parameter even if unused, this is mandatory for Express 4
     /* eslint-disable no-unused-vars */
     app.use((req, res, next) => {
-        console.error(`Route not found to ${req.path}`);
+        console.error(`💥 Route not found to ${req.path}`);
         res.status(404);
         res.json({error: 'Not found'});
     });
 }
 
-const app = express();
-init(app);
-routes(app);
-fallbacks(app);
+async function run() {
+    const oidc = new OIDCMiddleware(options.config.oidc);
+    console.debug(`🔧 Initializing OpenID Connect...`);
+    await oidc.init();
 
-const {iface, port} = options.config;
-app.listen(port, iface, () => {
-    console.info(`Server listening: http://${iface}:${port}`);
-});
+    const app = express();
+    init(app);
+    routes(app, oidc);
+    fallbacks(app);
+
+    const {iface, port} = options.config;
+    app.listen(port, iface, () => {
+        console.info(`🏁 Server listening: http://${iface}:${port}`);
+    });
+}
+
+run();

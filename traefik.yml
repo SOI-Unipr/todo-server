@@ -8,8 +8,8 @@
 ## todo-app> http-server -p 7001 -g .
 ## todo-server> npm start
 ##
-## AGENT -> http://soi-lab.local:9000 -> trafik -> static (http://localhost:7001)
-## AGENT -> http://soi-lab.local:9000/api -> trafik -> todo-server (http://localhost:8000)
+## AGENT -> http://localhost:9000 -> trafik -> static (http://localhost:7001)
+## AGENT -> http://localhost:9000/api -> trafik -> todo-server (http://localhost:8000)
 ## AGENT -> http://localhost:9090 -> traefik/dahsboard
 
 global:

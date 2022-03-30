@@ -43,8 +43,10 @@ testem.log
 /typings
 /logs
 /config/.env
+/keys/public.json
 *.sqlite
 *.sqlite-journal
+.env
 
 # System Files
 .DS_Store
@@ -53,5 +55,3 @@ Thumbs.db
 # Built archives
 *.tgz
 *.tar
-
-/keys/public.json
