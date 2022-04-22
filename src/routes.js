@@ -63,12 +63,13 @@ function isInteger(n) {
  * Initializes routes.
  * @param {Express} app Express application
  * @param {OIDCMiddleware} oidc OpenID Connect middleware
+ * @param {{iface: string, port: number, auth: boolean, oidc: {redirect: string, clientId: string, secret: string}}} config Configuration options
  */
-export function routes(app, oidc) {
-    const authenticate = (req, res, next) => oidc.validate(req, res, next);
+export function routes(app, oidc, config) {
+    const authenticate = config.auth ? (req, res, next) => oidc.validate(req, res, next) : (_req, _res, next) => next();
 
     app.get('/login', (req, resp) => {
-        oidc.login(req, res);
+        oidc.login(req, resp);
     });
 
     app.get('/tasks', authenticate, (req, resp) => {
@@ -162,5 +163,3 @@ export function routes(app, oidc) {
         resp.json(toDTO(task));
     });
 }
-
-export default routes;

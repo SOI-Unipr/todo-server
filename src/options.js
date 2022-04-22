@@ -17,7 +17,7 @@ function assertPort(port, program, excode) {
 
 /**
  * Prepares the configuration from environment variables.
- * @return {{config: {iface: string, port: number, oidc: {redirect: string, clientId: string, secret: string}}}} Configuration
+ * @return {{config: {iface: string, port: number, auth: boolean, oidc: {redirect: string, clientId: string, secret: string}}}} Configuration
  */
 function configFromEnv() {
     dotenv.config();
@@ -27,12 +27,13 @@ function configFromEnv() {
     if (process.env.OIDC_CLIENT_ID) (cfg.oidc = cfg.oidc || {}).clientId = process.env.OIDC_CLIENT_ID;
     if (process.env.OIDC_SECRET) (cfg.oidc = cfg.oidc || {}).secret = process.env.OIDC_SECRET;
     if (process.env.OIDC_REDIRECT) (cfg.oidc = cfg.oidc || {}).redirect = process.env.OIDC_REDIRECT;
+    if (process.env.AUTH === false) cfg.auth = process.env.AUTH; else cfg.auth = true;
     return cfg;
 }
 
 /**
  * Reads the command line and returns the parsed configuration.
- * @return {{config: {iface: string, port: number, oidc: {redirect: string, clientId: string, secret: string}}}} Configuration
+ * @return {{config: {iface: string, port: number, auth: boolean, oidc: {redirect: string, clientId: string, secret: string}}}} Configuration
  */
 export function parse() {
     const {version} = JSON.parse(readFileSync('./package.json'));
@@ -41,22 +42,24 @@ export function parse() {
     program
         .version(version)
         .option('-i, --iface <interface>', 'The interface the service will listen to for requests', '0.0.0.0')
-        .option('-E, --no-env', 'Ignores the .env file')
         .option('-p, --port <port>', 'The port number the service will listen to for requests', p => parseInt(p, 10), 8000)
         .option('-c, --oidc-client-id <id>', 'OpenID Connect client ID')
         .option('-s, --oidc-secret <secret>', 'OpenID Connect client secret code')
         .option('-r, --oidc-redirect <uri>', 'OpenID Connect redirect URI')
+        .option('-E, --no-env', 'Ignores the .env file')
+        .option('-A, --no-auth', 'Disables authentication and authorization')
     ;
 
     // parses command line
     program.parse(process.argv);
     assertPort(program.port, program, 2);
 
-    const env = program.noEnv ? {} : configFromEnv();
+    const env = !program.env ? {} : configFromEnv();
 
     const config = merge(env, {
         iface: program.iface,
         port: program.port,
+        auth: program.auth,
         oidc: {
             clientId: program.oidcClientId,
             secret: program.oidcSecret,

@@ -16,9 +16,6 @@ import opts from './options.js';
 import {routes} from './routes.js';
 import {OIDCMiddleware} from './openid.js';
 
-// creates the configuration options and the logger
-const options = opts();
-
 /**
  * Initializes the application middlewares.
  *
@@ -66,19 +63,26 @@ function fallbacks(app) {
 }
 
 async function run() {
-    const oidc = new OIDCMiddleware(options.config.oidc);
+    // creates the configuration options and the logger
+    const options = opts();
+    console.debug('🔧 Configuration', options);
+
     console.debug(`🔧 Initializing OpenID Connect...`);
+    const oidc = new OIDCMiddleware(options.config.oidc);
     await oidc.init();
 
+    console.debug(`🔧 Initializing routes...`);
     const app = express();
     init(app);
-    routes(app, oidc);
+    routes(app, oidc, options.config);
     fallbacks(app);
 
     const {iface, port} = options.config;
     app.listen(port, iface, () => {
+        // noinspection HttpUrlsUsage
         console.info(`🏁 Server listening: http://${iface}:${port}`);
     });
 }
 
+// noinspection JSIgnoredPromiseFromCall
 run();
