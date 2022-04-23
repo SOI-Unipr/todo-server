@@ -3,7 +3,7 @@
 import fetch from 'node-fetch';
 import jwksRSA from 'jwks-rsa';
 import jwt from 'jsonwebtoken';
-import {google} from 'googleapis';
+import {OAuth2Client} from 'google-auth-library';
 
 const AUTHORIZATION_RE = /^Bearer (?<token>.+)/;
 const GOOGLE_ISSUER = 'https://accounts.google.com';
@@ -14,9 +14,11 @@ const GOOGLE_SCOPE = 'https://www.googleapis.com/auth/userinfo.email';
  * OpenID Connect middleware.
  */
 export class OIDCMiddleware {
+    /** @type {{clientId:string,secret:string,redirect:string}|null} */
     #cfg = null;
     #publicKeys = [];
     #initializing = null;
+    /** @type {OAuth2Client|null} */
     #auth = null;
 
     /**
@@ -25,7 +27,7 @@ export class OIDCMiddleware {
      */
     constructor(cfg) {
         this.#cfg = cfg;
-        this.#auth = new google.auth.OAuth2(
+        this.#auth = new OAuth2Client(
             cfg.clientId,
             cfg.secret,
             cfg.redirect
@@ -130,5 +132,27 @@ export class OIDCMiddleware {
             scope: GOOGLE_SCOPE,
         });
         res.redirect(authUrl);
+    }
+
+    /**
+     * Exchanges the authorization code for the access and refresh tokens.
+     * @param {Request} req A request
+     * @param {Response} res A response
+     */
+    async tokens(req, res) {
+        const {code} = req.query;
+        if (!code) {
+            res.status(400).json({error: 'missing authorization token'});
+            return;
+        }
+        const {tokens} = await this.#auth.getToken(code);
+        console.info('🔒 User successfully logged in via Google',
+            {user: tokens.clientEmail, scope: tokens.scope});
+
+        res.json({
+            user: tokens.clientEmail,
+            access_token: tokens.access_token,
+            refresh_token: tokens.refresh_token
+        });
     }
 }

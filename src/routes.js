@@ -72,6 +72,11 @@ export function routes(app, oidc, config) {
         oidc.login(req, resp);
     });
 
+    app.get('/tokens', (req, resp) => {
+        // noinspection JSIgnoredPromiseFromCall
+        oidc.tokens(req, resp);
+    });
+
     app.get('/tasks', authenticate, (req, resp) => {
         console.debug('Retrieving all tasks');
 
