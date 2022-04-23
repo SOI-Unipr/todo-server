@@ -17,6 +17,7 @@ export class OIDCMiddleware {
     /** @type {{clientId:string,secret:string,redirect:string}|null} */
     #cfg = null;
     #publicKeys = [];
+    /** @type {Promise<true>|null} */
     #initializing = null;
     /** @type {OAuth2Client|null} */
     #auth = null;
@@ -146,11 +147,10 @@ export class OIDCMiddleware {
             return;
         }
         const {tokens} = await this.#auth.getToken(code);
-        console.info('🔒 User successfully logged in via Google',
-            {user: tokens.clientEmail, scope: tokens.scope});
+        console.info('🔒 User successfully logged in via Google', {scope: tokens.scope});
 
         res.json({
-            user: tokens.clientEmail,
+            id_token: tokens.id_token,
             access_token: tokens.access_token,
             refresh_token: tokens.refresh_token
         });

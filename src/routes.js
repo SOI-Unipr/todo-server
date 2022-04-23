@@ -78,7 +78,7 @@ export function routes(app, oidc, config) {
     });
 
     app.get('/tasks', authenticate, (req, resp) => {
-        console.debug('Retrieving all tasks');
+        console.debug('Retrieving all tasks', {principal: req.principal.email});
 
         const objects = tasks.map(toDTO);
         resp.json({
@@ -89,7 +89,7 @@ export function routes(app, oidc, config) {
 
     app.post('/task', authenticate, (req, resp) => {
         const {description} = req.body;
-        console.debug('Attempting to crete a new task', {description});
+        console.debug('Attempting to crete a new task', {description, principal: req.principal.email});
 
         if (!isNonBlank(description)) {
             resp.status(400);
@@ -104,7 +104,7 @@ export function routes(app, oidc, config) {
 
         const task = new Task(seq(), description.trim());
         tasks.push(task);
-        console.info('Task successfully created', {task});
+        console.info('Task successfully created', {task, principal: req.principal.email});
 
         resp.status(201);
         resp.json(toDTO(task));
@@ -113,7 +113,7 @@ export function routes(app, oidc, config) {
     app.put('/task/:id', authenticate, (req, resp) => {
         const {description} = req.body;
         const idRaw = req.params.id;
-        console.debug('Attempting to update task', {id: idRaw, description});
+        console.debug('Attempting to update task', {id: idRaw, description, principal: req.principal.email});
 
         if (!isNonBlank(description)) {
             resp.status(400);
@@ -140,14 +140,14 @@ export function routes(app, oidc, config) {
 
         task.description = description.trim();
         resp.status(200);
-        console.info('Task successfully updated', {task});
+        console.info('Task successfully updated', {task, principal: req.principal.email});
 
         resp.json(toDTO(task));
     });
 
     app.delete('/task/:id', authenticate, (req, resp) => {
         const idRaw = req.params.id;
-        console.debug('Attempting to delete task', {id: idRaw});
+        console.debug('Attempting to delete task', {id: idRaw, principal: req.principal.email});
 
         if (!isInteger(idRaw)) {
             resp.status(400);
@@ -163,7 +163,7 @@ export function routes(app, oidc, config) {
         }
         const [task] = tasks.splice(j, 1);
 
-        console.info('Task successfully deleted', {task});
+        console.info('Task successfully deleted', {task, principal: req.principal.email});
         resp.status(200);
         resp.json(toDTO(task));
     });
