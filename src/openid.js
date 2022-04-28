@@ -111,6 +111,7 @@ export class OIDCMiddleware {
             req.principal = this.verifyToken(token);
         } catch (err) {
             res.status(401).json({error: 'unauthorized'});
+            return;
         }
         next();
     }
